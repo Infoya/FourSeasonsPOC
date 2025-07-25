@@ -5,10 +5,7 @@ import openai
 import warnings
 import time
 from dotenv import load_dotenv
-import bs4
-from bs4 import BeautifulSoup
-import re
-import urllib.parse
+from openai import OpenAI
 
 # Suppress Deprecation Warnings for now
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -17,6 +14,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 ASSISTANT_ID = os.getenv("ASSISTANT_ID")
+# client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 if not openai.api_key or not ASSISTANT_ID:
     raise EnvironmentError("❌ Missing OPENAI_API_KEY or ASSISTANT_ID in your .env file")
@@ -33,17 +31,17 @@ result_set_id = None
 # Four Seasons API Wrappers
 # =============================
 def confirm_booking_if_available(start_date, end_date, destination):
-    ows_code = "BLR546"
-    print(f"🔍 Checking availability for {destination} ({ows_code}) from {start_date} to {end_date}")
-    is_available = check_availability(ows_code)
-    if not is_available:
-        return f"❌ No rooms available at {destination} from {start_date} to {end_date}."
-
     persons = 2
     room_type = "STD"
     price = 15000.0
     result = post_result_set(start_date, end_date, destination, persons, room_type, price)
-    return f"✅ Booking confirmed and added to cart with ID {result['id']} for {destination} from {start_date} to {end_date}."
+    return {
+        "status": "success",
+        "message": f"Booking confirmed for {destination} from {start_date} to {end_date}.",
+        "next_action": "ask_addons",
+        "result_set_id": result["id"],
+        "destination": destination
+    }
 
 def post_result_set(start_date, end_date, property_name, persons, room_type, price):
     url = "http://127.0.0.1:8080/resultSet"
@@ -95,14 +93,18 @@ def get_property_experiences(owsCode):
     response.raise_for_status()
     return response.json()
 
-def check_availability(start_date, end_date):
-    owsCode = "BLR546"  # default
-    print(f"Checking availability for OWS Code: {owsCode}, Start: {start_date}, End: {end_date}")
+def check_availability(owsCode, start_date, end_date):
     url = f"https://reservations.fourseasons.com/tretail/calendar/availability?propertySelection=SINGLE&hotelCityCode={owsCode}"
     response = requests.get(url)
     response.raise_for_status()
-    print(response.json())
-    return {"status": "Available"}
+    return {
+    "status": "available",
+    "owsCode": owsCode,
+    "start_date": start_date,
+    "end_date": end_date,
+    "message": f"✅ The property with OWS Code {owsCode} is available from {start_date} to {end_date}.",
+    "next_action": "prompt_confirm_booking"
+}
 
 def get_fourseasons_properties():
     url = "https://reservations.fourseasons.com/content/en/properties"
@@ -166,20 +168,17 @@ def run_assistant():
                 role="user",
                 content=user_input
             )
-            print("Message sent to assistant")
 
-            run = openai.beta.threads.runs.create(
+            run = openai.beta.threads.runs.create_and_poll(
                 thread_id=thread.id,
                 assistant_id=ASSISTANT_ID
             )
-            print("Assistant run started: ", run.id)
 
             while True:
                 run_status = openai.beta.threads.runs.retrieve(
                     thread_id=thread.id,
                     run_id=run.id
                 )
-                print("Run status:", run_status.status)
 
                 if run_status.status == "completed":
                     break
@@ -190,11 +189,12 @@ def run_assistant():
                     for call in tool_calls:
                         name = call.function.name
                         args = json.loads(call.function.arguments)
-                        print(f"🔧 Calling tool: {name} with arguments: {args}")
+                        print(f"Tool Calling: {name} with arguments: {args}")
 
                         try:
                             if name == "check_availability":
                                 result = check_availability(
+                                    owsCode = args["owsCode"],
                                     start_date=args["start_date"],
                                     end_date=args["end_date"]
                                 )
@@ -204,10 +204,10 @@ def run_assistant():
                                 })
 
                             elif name == "get_fourseasons_properties":
-                                result = get_fourseasons_properties()
+                                result = fetch_all_properties()
                                 tool_outputs.append({
                                     "tool_call_id": call.id,
-                                    "output": json.dumps(result)
+                                    "output": json.dumps(result),
                                 })
 
                             elif name == "confirm_booking_if_available":
@@ -218,24 +218,28 @@ def run_assistant():
                                 )
                                 tool_outputs.append({
                                     "tool_call_id": call.id,
-                                    "output": result
+                                    "output": json.dumps(result)
                                 })
                         except Exception as e:
                             print(f"❌ Tool {name} failed: {e}")
+                            tool_outputs.append({
+                                "tool_call_id": call.id,
+                                "output": json.dumps({"status": "Unavailable", "error": str(e)})
+                            })
 
-                    openai.beta.threads.runs.submit_tool_outputs(
+                    openai.beta.threads.runs.submit_tool_outputs_and_poll(
                         thread_id=thread.id,
                         run_id=run.id,
                         tool_outputs=tool_outputs
                     )
-                elif run_status.status in ["failed", "cancelled"]:
+                elif run_status.status in ["expired", "failed", "cancelled", "incomplete"]:
                     print(f"❌ Run failed with status: {run_status.status}")
                     break
 
                 time.sleep(1)
 
             messages = openai.beta.threads.messages.list(thread_id=thread.id)
-            for msg in reversed(messages.data):
+            for msg in messages.data:
                 if msg.role == "assistant":
                     print(f"\nAI: {msg.content[0].text.value}")
                     break
