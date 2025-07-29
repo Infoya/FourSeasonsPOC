@@ -6,6 +6,7 @@ import warnings
 import time
 from dotenv import load_dotenv
 from openai import OpenAI
+from datetime import date
 
 # Suppress Deprecation Warnings for now
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -44,7 +45,7 @@ def confirm_booking_if_available(start_date, end_date, destination):
     }
 
 def post_result_set(start_date, end_date, property_name, persons, room_type, price):
-    url = "http://127.0.0.1:8080/resultSet"
+    url = "http://127.0.0.1:8000/resultSet"
     payload = {
         "start_date": start_date,
         "end_date": end_date,
@@ -55,10 +56,11 @@ def post_result_set(start_date, end_date, property_name, persons, room_type, pri
     }
     response = requests.post(url, json=payload)
     response.raise_for_status()
+    print(response.json())
     return response.json()
 
 def post_addons(result_set_id, sku_id, price, details):
-    url = "http://127.0.0.1:8080/addOns"
+    url = "http://127.0.0.1:8000/addOns"
     payload = {
         "result_set_id": result_set_id,
         "sku_id": sku_id,
@@ -70,13 +72,13 @@ def post_addons(result_set_id, sku_id, price, details):
     return response.json()
 
 def get_cart_result_set(result_set_id):
-    url = f"http://127.0.0.1:8080/cart/{result_set_id}"
+    url = f"http://127.0.0.1:8000/cart/{result_set_id}"
     response = requests.get(url)
     response.raise_for_status()
     return response.json()
 
 def checkout_result_set(result_set_id):
-    url = f"http://127.0.0.1:8080/checkout/{result_set_id}"
+    url = f"http://127.0.0.1:8000/checkout/{result_set_id}"
     response = requests.get(url)
     response.raise_for_status()
     return response.json()
@@ -157,6 +159,12 @@ def run_assistant():
             "output": json.dumps({"status": "Unavailable", "error": str(e)})
         })
         return
+    today = date.today().isoformat()
+    openai.beta.threads.messages.create(
+        thread_id=thread.id,
+        role="user",
+        content=f"Remember current date: {today}"
+    )
 
     while True:
         user_input = input("You: ").strip()
@@ -192,7 +200,7 @@ def run_assistant():
                     for call in tool_calls:
                         name = call.function.name
                         args = json.loads(call.function.arguments)
-                        # print(f"Tool Calling: {name} with arguments: {args}")
+                        print(f"Tool Calling: {name} with arguments: {args}")
 
                         try:
                             if name == "check_availability":
