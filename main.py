@@ -152,6 +152,10 @@ def run_assistant():
         thread = openai.beta.threads.create()
     except Exception as e:
         print(f"❌ Failed to create thread: {e}")
+        tool_outputs.append({
+            "tool_call_id": "",
+            "output": json.dumps({"status": "Unavailable", "error": str(e)})
+        })
         return
 
     while True:
@@ -224,7 +228,7 @@ def run_assistant():
                                 result = post_result_set(
                                     start_date=args["start_date"],
                                     end_date=args["end_date"],
-                                    property_name=args["property_name"],
+                                    property_name=args["property_name"] or args.get("destination"),
                                     persons=args["persons"],
                                     room_type=args["room_type"],
                                     price=args["price"]
@@ -298,6 +302,10 @@ def run_assistant():
                     break
         except Exception as e:
             print(f"❌ Error during assistant interaction: {e}")
+            tool_outputs.append({
+                "tool_call_id": "",
+                "output": json.dumps({"status": "Unavailable", "error": str(e)})
+            })
 
 if __name__ == "__main__":
     run_assistant()
