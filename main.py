@@ -159,7 +159,7 @@ def fetch_all_properties():
 
 
 def run_assistant(user_input: str, thread_id: str = None):
-    print("Welcome to the FourSeasons Assistant Booking CLI")
+    # print("Welcome to the FourSeasons Assistant Booking CLI")
     # try:
     #     global_settings()
     #     bookingflow()
