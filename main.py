@@ -51,7 +51,7 @@ def confirm_booking_if_available(start_date, end_date, destination):
 
 
 def post_result_set(start_date, end_date, property_name, persons, room_type, price):
-    url = "http://127.0.0.1:8000/resultSet"
+    url = "http://127.0.0.1:3100/resultSet"
     payload = {
         "start_date": start_date,
         "end_date": end_date,
@@ -67,7 +67,7 @@ def post_result_set(start_date, end_date, property_name, persons, room_type, pri
 
 
 def post_addons(result_set_id, sku_id, price, details):
-    url = "http://127.0.0.1:8000/addOns"
+    url = "http://127.0.0.1:3100/addOns"
     payload = {
         "result_set_id": result_set_id,
         "sku_id": sku_id,
@@ -80,14 +80,14 @@ def post_addons(result_set_id, sku_id, price, details):
 
 
 def get_cart_result_set(result_set_id):
-    url = f"http://127.0.0.1:8000/cart/{result_set_id}"
+    url = f"http://127.0.0.1:3100/cart/{result_set_id}"
     response = requests.get(url)
     response.raise_for_status()
     return response.json()
 
 
 def checkout_result_set(result_set_id):
-    url = f"http://127.0.0.1:8000/checkout/{result_set_id}"
+    url = f"http://127.0.0.1:3100/checkout/{result_set_id}"
     response = requests.get(url)
     response.raise_for_status()
     return response.json()

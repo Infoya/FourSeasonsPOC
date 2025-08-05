@@ -1,5 +1,5 @@
 // API service for communicating with the Python backend
-const API_BASE_URL = 'http://localhost:8100'; // Updated to match your backend port
+const API_BASE_URL = 'http://127.0.0.1:8100'; // Updated to match your backend port
 
 export interface ChatMessage {
   id: string;
