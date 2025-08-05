@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './App.css';
 import ChatBot from './components/ChatBot';
-import robotIcon from './assets/images/robotIcon.png'
+import aiIcon from './assets/images/ai-Icon.png'
 
 function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -158,12 +158,11 @@ function App() {
       {/* Animated Chat Bubble */}
       <button
         onClick={() => setIsChatOpen(true)}
-        className={`fixed bottom-6 right-6 w-16 h-16 bg-white text-black rounded-full shadow-lg hover:bg-gray-100 transition-all duration-300 z-50 flex items-center justify-center ${
-          isChatOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'
-        }`}
+        className={`fixed bottom-6 right-6 w-[120px] h-[120px] bg-white text-gray-800 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.8)] hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.9)] transition-all duration-300 z-50 flex items-center justify-center ${isChatOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'}`}
+        style={{ borderRadius: '50%', aspectRatio: '1/1' }}
         aria-label="Open chat"
       >
-        <img className='h-12' src={robotIcon} alt="" />
+        <img className='h-8 w-8 object-contain' src={aiIcon} alt="AI Chat" />
       </button>
     </div>
   );
