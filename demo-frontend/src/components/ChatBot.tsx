@@ -27,6 +27,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [threadId, setThreadId] = useState<string | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected'>('connected');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -53,6 +54,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
     setIsLoading(true);
 
     try {
+      setConnectionStatus('connected');
       // Call the API service
       const response: ApiResponse = await sendMessage(currentInput, threadId || undefined);
       
@@ -70,9 +72,10 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
       setMessages(prev => [...prev, botResponse]);
     } catch (error) {
       console.error('Error sending message:', error);
+      setConnectionStatus('disconnected');
       const errorResponse: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'Sorry, I\'m having trouble connecting right now. Please try again later.',
+        text: 'Sorry, I\'m having trouble connecting to the AI assistant right now. Please try again later.',
         sender: 'bot',
         timestamp: new Date()
       };
@@ -100,7 +103,10 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
               <img src={fsIcon} alt="Logo" className="w-8 h-8 rounded-full bg-white" />
               <div className='header-text'>
                 <div className="font-semibold text-sm">FourSeasons</div>
-                <div className="text-xs text-gray-300">AI Chatbot</div>
+                <div className="text-xs text-gray-300 flex items-center">
+                  AI Chatbot
+                  <span className={`ml-2 w-2 h-2 rounded-full ${connectionStatus === 'connected' ? 'bg-green-400' : 'bg-red-400'}`}></span>
+                </div>
               </div>
             </div>
             <button onClick={onClose} className="text-white text-xl leading-none bg-transparent border-none p-0 hover:opacity-80">X</button>

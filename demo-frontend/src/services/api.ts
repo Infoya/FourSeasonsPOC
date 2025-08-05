@@ -49,7 +49,7 @@ export const sendMessage = async (message: string, threadId?: string): Promise<A
   }
 };
 
-// Local response function for demo purposes
+// Local response function for demo purposes (fallback when backend is unavailable)
 const getLocalResponse = (message: string): string => {
   const input = message.toLowerCase();
   
