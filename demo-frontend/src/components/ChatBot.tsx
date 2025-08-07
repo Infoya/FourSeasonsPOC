@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { sendMessage, ApiResponse } from '../services/api';
+import ReactMarkdown from 'react-markdown';
 import fsIcon from '../assets/images/fsIcon.jpg'
 import sendIcon from '../assets/images/send.png'
 
@@ -51,14 +52,14 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
       setConnectionStatus('connected');
       // Call the API to initialize and get thread_id
       const response: ApiResponse = await sendMessage('', undefined);
-      
+
       if (response.thread_id) {
         setThreadId(response.thread_id);
         console.log('Chatbot initialized with thread_id:', response.thread_id);
       } else {
         console.warn('No thread_id received during initialization');
       }
-      
+
       setIsInitialized(true);
     } catch (error) {
       console.error('Error initializing chatbot:', error);
@@ -87,12 +88,12 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
       setConnectionStatus('connected');
       // Call the API service with the saved thread_id
       const response: ApiResponse = await sendMessage(currentInput, threadId || undefined);
-      
+
       // Update thread_id if we get a new one (shouldn't happen after initialization)
       if (response.thread_id && !threadId) {
         setThreadId(response.thread_id);
       }
-      
+
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
         text: response.response,
@@ -150,7 +151,62 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
               className={`message ${message.sender === 'user' ? 'user' : 'bot'}`}
             >
               <div className="message-content px-8">
-                <p className="text-sm">{message.text}</p>
+                {message.sender === 'bot' ? (
+                  <ReactMarkdown
+                    components={{
+                      // Style links with blue color and underline
+                      a: ({ node, ...props }) => (
+                        <a
+                          {...props}
+                          className="text-blue-600 underline hover:text-blue-800 transition-colors"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        />
+                      ),
+                      // Style bold text
+                      strong: ({ node, ...props }) => (
+                        <strong {...props} className="font-bold" />
+                      ),
+                      // Style italic text
+                      em: ({ node, ...props }) => (
+                        <em {...props} className="italic" />
+                      ),
+                      // Style code blocks
+                      code: ({ node, inline, ...props }: any) => (
+                        inline ? (
+                          <code {...props} className="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono" />
+                        ) : (
+                          <code {...props} className="block bg-gray-100 p-2 rounded text-sm font-mono overflow-x-auto" />
+                        )
+                      ),
+                      // Style headings
+                      h1: ({ node, ...props }) => (
+                        <h1 {...props} className="text-xl font-bold mb-2" />
+                      ),
+                      h2: ({ node, ...props }) => (
+                        <h2 {...props} className="text-lg font-bold mb-2" />
+                      ),
+                      h3: ({ node, ...props }) => (
+                        <h3 {...props} className="text-base font-bold mb-1" />
+                      ),
+                      // Style lists
+                      ul: ({ node, ...props }) => (
+                        <ul {...props} className="list-disc list-inside mb-2" />
+                      ),
+                      ol: ({ node, ...props }) => (
+                        <ol {...props} className="list-decimal list-inside mb-2" />
+                      ),
+                      // Style paragraphs
+                      p: ({ node, ...props }) => (
+                        <p {...props} className="mb-2 last:mb-0" />
+                      ),
+                    }}
+                  >
+                    {message.text}
+                  </ReactMarkdown>
+                ) : (
+                  <p className="text-sm">{message.text}</p>
+                )}
                 <p className="message-time">
                   {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>
