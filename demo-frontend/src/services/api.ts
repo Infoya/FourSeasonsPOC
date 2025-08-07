@@ -1,5 +1,5 @@
 // API service for communicating with the Python backend
-const API_BASE_URL = 'http://127.0.0.1:8100'; // Updated to match your backend port
+const API_BASE_URL = 'http://127.0.0.1:4000'; // Updated to match your backend port
 
 export interface ChatMessage {
   id: string;
@@ -24,10 +24,14 @@ export const sendMessage = async (message: string, threadId?: string): Promise<A
       headers['threadid'] = threadId;
     }
 
+    // For initialization, send a welcome message if the message is empty
+    const trimmedMessage = message.trim();
+    const userInput = trimmedMessage === '' ? 'Hi' : trimmedMessage;
+
     const response = await fetch(`${API_BASE_URL}/query`, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ user_input: message }),
+      body: JSON.stringify({ user_input: userInput }),
     });
 
     if (!response.ok) {

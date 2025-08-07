@@ -28,6 +28,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [threadId, setThreadId] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected'>('connected');
+  const [isInitialized, setIsInitialized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -37,6 +38,35 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Initialize thread_id when chatbot opens
+  useEffect(() => {
+    if (isOpen && !isInitialized) {
+      initializeChatbot();
+    }
+  }, [isOpen, isInitialized]);
+
+  const initializeChatbot = async () => {
+    try {
+      setConnectionStatus('connected');
+      // Call the API to initialize and get thread_id
+      const response: ApiResponse = await sendMessage('', undefined);
+      
+      if (response.thread_id) {
+        setThreadId(response.thread_id);
+        console.log('Chatbot initialized with thread_id:', response.thread_id);
+      } else {
+        console.warn('No thread_id received during initialization');
+      }
+      
+      setIsInitialized(true);
+    } catch (error) {
+      console.error('Error initializing chatbot:', error);
+      setConnectionStatus('disconnected');
+      // Continue without thread_id if initialization fails
+      setIsInitialized(true);
+    }
+  };
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
@@ -55,10 +85,10 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
 
     try {
       setConnectionStatus('connected');
-      // Call the API service
+      // Call the API service with the saved thread_id
       const response: ApiResponse = await sendMessage(currentInput, threadId || undefined);
       
-      // Extract thread ID from response if available
+      // Update thread_id if we get a new one (shouldn't happen after initialization)
       if (response.thread_id && !threadId) {
         setThreadId(response.thread_id);
       }

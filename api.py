@@ -22,4 +22,5 @@ class QueryRequest(BaseModel):
 @app.post("/query")
 async def query_endpoint(request: QueryRequest, threadid: Optional[str] = Header(None)):
     result = run_assistant(request.user_input, thread_id=threadid)
+    print(result)
     return result
