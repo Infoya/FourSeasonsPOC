@@ -21,7 +21,7 @@ function App() {
           <source src="/fourseason-bg-video.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
-        <div className="absolute inset-0 bg-black/75"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-black/100 via-black/80 to-black/60"></div>
       </div>
 
       {/* Header */}
