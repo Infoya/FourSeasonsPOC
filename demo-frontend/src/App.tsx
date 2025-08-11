@@ -2,15 +2,26 @@ import React, { useState } from 'react';
 import './App.css';
 import ChatBot from './components/ChatBot';
 import aiIcon from './assets/images/ai-Icon.png'
+import fourseasonsLogo from './assets/images/fourseasons-app-logo.webp'
 
 function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-black/40 z-0">
-        <div className="absolute inset-0 bg-tropical-resort"></div>
+      {/* Background Video */}
+      <div className="fixed inset-0 z-0">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover"
+        >
+          <source src="/fourseason-bg-video.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+        <div className="absolute inset-0 bg-black/75"></div>
       </div>
 
       {/* Header */}
@@ -19,16 +30,17 @@ function App() {
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-6">
               <div className="flex items-center">
-                <div className="w-8 h-8 mr-2">
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                  </svg>
-                </div>
-                <span className="text-lg font-semibold">DOWNLOAD THE APP</span>
+                <img 
+                  src={fourseasonsLogo} 
+                  alt="Four Seasons Logo" 
+                  className="w-8 h-8 object-contain rounded-lg"
+                  style={{ borderRadius: '4px' }}
+                />
+                <span className="text-lg font-semibold ml-2">DOWNLOAD THE APP</span>
               </div>
             </div>
             <nav className="hidden md:flex items-center space-x-8">
-              <button className="text-white hover:text-gray-300 transition-colors bg-transparent border-none cursor-pointer">ALL HOTELS AND RESORTS</button>
+              <span>ALL HOTELS AND RESORTS</span>
               <div className="flex items-center space-x-2">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -54,11 +66,14 @@ function App() {
       {/* Hero Section */}
       <section className="relative z-10 flex items-center justify-center min-h-screen px-4">
         <div className="text-center text-white max-w-4xl">
-          <div className="mb-8">
+          <div className="mb-6">
             <div className="w-16 h-16 mx-auto mb-4">
-              <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-              </svg>
+              <img 
+                src={fourseasonsLogo} 
+                alt="Four Seasons Logo" 
+                className="w-full h-full object-contain rounded-lg"
+                style={{ borderRadius: '8px' }}
+              />
             </div>
             <h1 className="text-6xl md:text-8xl font-bold mb-4">
               DISCOVER<br />
@@ -169,3 +184,4 @@ function App() {
 }
 
 export default App;
+

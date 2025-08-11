@@ -34,18 +34,47 @@ result_set_id = None
 # =============================
 # Four Seasons API Wrappers
 # =============================
-def confirm_booking_if_available(start_date, end_date, property_name, persons, room_type, price):
+def confirm_booking_if_available(start_date, end_date, property_name=None, persons=None, room_type=None, price=None, destination=None):
+    # Handle both property_name and destination parameters
+    if destination and not property_name:
+        property_name = destination
+    elif property_name and not destination:
+        destination = property_name
+    
+    # Set default values if not provided
+    if not property_name:
+        raise ValueError("Either property_name or destination must be provided")
+    
+    if not persons:
+        persons = 2
+    if not room_type:
+        room_type = "STD"
+    if not price:
+        price = 15000.0
+    
+    print(f"🔍 DEBUG: Attempting to confirm booking for {property_name}")
+    print(f"🔍 DEBUG: Dates: {start_date} to {end_date}")
+    print(f"🔍 DEBUG: Guests: {persons}, Room: {room_type}, Price: {price}")
+    
     result = post_result_set(
-        start_date, end_date, property_name, persons, room_type, price
+        start_date=start_date, 
+        end_date=end_date, 
+        property_name=property_name, 
+        persons=persons, 
+        room_type=room_type, 
+        price=price
     )
+    
+    print(f"🔍 DEBUG: post_result_set returned: {result}")
     
     # Check if the booking service returned an error
     if isinstance(result, dict) and result.get("status") == "error":
+        print(f"❌ Booking failed: {result.get('message', 'Unknown error')}")
         return {
             "status": "error",
-            "message": f"Unable to confirm booking for {destination} from {start_date} to {end_date}. {result.get('message', 'Booking service is currently unavailable.')}",
+            "message": f"Unable to confirm booking for {property_name} from {start_date} to {end_date}. {result.get('message', 'Booking service is currently unavailable.')}",
             "error": result.get("error", "Unknown error"),
-            "destination": destination,
+            "destination": property_name,
         }
     
     # If successful (including mock bookings), return the confirmation
@@ -53,39 +82,63 @@ def confirm_booking_if_available(start_date, end_date, property_name, persons, r
         booking_id = result.get("id", "unknown")
         note = result.get("note", "")
         
+        print(f"✅ Booking successful: {booking_id}")
         return {
             "status": "success",
-            "message": f"✅ Booking confirmed for {destination} from {start_date} to {end_date} for {persons} guests. Booking ID: {booking_id}. {note}",
+            "message": f"✅ Booking confirmed for {property_name} from {start_date} to {end_date} for {persons} guests. Booking ID: {booking_id}. {note}",
             "next_action": "ask_addons",
             "result_set_id": booking_id,
-            "destination": destination,
+            "destination": property_name,
         }
     
     # Fallback response
+    print(f"⚠️ Using fallback response for booking")
     return {
         "status": "success",
-        "message": f"Booking confirmed for {destination} from {start_date} to {end_date}.",
+        "message": f"Booking confirmed for {property_name} from {start_date} to {end_date}.",
         "next_action": "ask_addons",
         "result_set_id": result.get("id", "unknown"),
-        "destination": destination,
+        "destination": property_name,
     }
 
 
-def post_result_set(start_date, end_date, property_name, persons, room_type, price):
+def post_result_set(start_date, end_date, property_name=None, persons=None, room_type=None, price=None, destination=None):
+    # Handle both property_name and destination parameters
+    if destination and not property_name:
+        property_name = destination
+    elif property_name and not destination:
+        destination = property_name
+    
+    # Set default values if not provided
+    if not property_name:
+        raise ValueError("Either property_name or destination must be provided")
+    
+    if not persons:
+        persons = 2
+    if not room_type:
+        room_type = "STD"
+    if not price:
+        price = 15000.0
+    
     url = "http://127.0.0.1:8800/resultSet"
     payload = {
         "start_date": start_date,
         "end_date": end_date,
-        "destination": property_name,
+        "destination": property_name,  # Use property_name as destination for the API
         "persons": persons,
         "room_type": room_type,
         "price": price,
     }
+    
+    print(f"🔍 DEBUG: Sending booking request to {url}")
+    print(f"🔍 DEBUG: Payload: {payload}")
+    
     try:
         response = requests.post(url, json=payload, timeout=5)
         response.raise_for_status()
-        print(response.json())
-        return response.json()
+        result = response.json()
+        print(f"🔍 DEBUG: Booking service response: {result}")
+        return result
     except requests.exceptions.ConnectionError:
         print(f"❌ Booking service not available at {url}")
         # Return a mock successful response for demo purposes
@@ -113,6 +166,13 @@ def post_result_set(start_date, end_date, property_name, persons, room_type, pri
         return {
             "status": "error",
             "message": f"Booking service error: {str(e)}",
+            "error": str(e)
+        }
+    except Exception as e:
+        print(f"❌ Unexpected error in post_result_set: {e}")
+        return {
+            "status": "error",
+            "message": f"Unexpected error: {str(e)}",
             "error": str(e)
         }
 
@@ -334,10 +394,10 @@ def run_assistant(user_input: str, thread_id: str = None):
                             result = confirm_booking_if_available(
                                 start_date=args["start_date"],
                                 end_date=args["end_date"],
-                                property_name=args["destination"],
-                                persons=args["persons"],
-                                room_type=args["room_type"],
-                                price=args["price"]
+                                property_name=args.get("property_name") or args.get("destination"),
+                                persons=args.get("persons", 2),
+                                room_type=args.get("room_type", "STD"),
+                                price=args.get("price", 15000.0)
                             )
                             tool_outputs.append(
                                 {
@@ -350,10 +410,10 @@ def run_assistant(user_input: str, thread_id: str = None):
                             result = post_result_set(
                                 start_date=args["start_date"],
                                 end_date=args["end_date"],
-                                property_name=args["destination"],
-                                persons=args["persons"],
-                                room_type=args["room_type"],
-                                price=args["price"],
+                                property_name=args.get("property_name") or args.get("destination"),
+                                persons=args.get("persons", 2),
+                                room_type=args.get("room_type", "STD"),
+                                price=args.get("price", 15000.0)
                             )
                             tool_outputs.append(
                                 {
