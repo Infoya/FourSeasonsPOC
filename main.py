@@ -225,6 +225,13 @@ def get_cart_result_set(result_set_id):
             "message": f"Booking service error: {str(e)}",
             "error": str(e)
         }
+    except Exception as e:
+        print(f"⚠️ Unexpected error in get_cart_result_set for {result_set_id}: {e}")
+        return {
+            "status": "error",
+            "message": f"Unexpected error occurred while fetching cart: {str(e)}",
+            "error": str(e)
+        }
 
 
 def checkout_result_set(result_set_id):
@@ -245,6 +252,13 @@ def checkout_result_set(result_set_id):
         return {
             "status": "error",
             "message": f"Booking service error: {str(e)}",
+            "error": str(e)
+        }
+    except Exception as e:
+        print(f"⚠️ Unexpected error in checkout_result_set for {result_set_id}: {e}")
+        return {
+            "status": "error",
+            "message": f"Unexpected error occurred during checkout: {str(e)}",
             "error": str(e)
         }
 
