@@ -131,16 +131,16 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
         {/* Header */}
           <div className="chat-header bg-black text-white px-4 py-3 flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <img src={fsIcon} alt="Logo" className="w-8 h-8 rounded-full bg-white" />
+              <img src={fsIcon} alt="Logo" className="rounded-full bg-white" style={{height: '50px', width: '50px'}} />
               <div className='header-text'>
-                <div className="font-semibold text-sm">FourSeasons</div>
-                <div className="text-xs text-gray-300 flex items-center">
+                <div className="font-semibold" style={{fontSize: '16px'}}>FourSeasons</div>
+                <div className="text-sm text-gray-300 flex items-center">
                   AI Chatbot
                   <span className={`ml-2 w-2 h-2 rounded-full ${connectionStatus === 'connected' ? 'bg-green-400' : 'bg-red-400'}`}></span>
                 </div>
               </div>
             </div>
-            <button onClick={onClose} className="text-white text-xl leading-none bg-transparent border-none p-0 hover:opacity-80">X</button>
+            <button onClick={onClose} className="text-white leading-none bg-transparent border-none p-0 hover:opacity-80" style={{width: '24px', height: '24px', fontSize: '20px'}}>X</button>
         </div>
 
         {/* Messages */}
@@ -242,9 +242,14 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
              onClick={handleSendMessage}
             disabled={!inputValue.trim() || isLoading}
             type="submit"
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-white border border-black hover:bg-gray-100 transition-colors duration-200"
+            className="flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors duration-200"
+            style={{
+              padding: '6px',
+              border: 'none',
+              backgroundColor: 'white'
+            }}
           >
-            <img className='h-4' src={sendIcon} alt="" />
+            <img style={{height: "30px", width: '30px', backgroundColor: 'white'}} src={sendIcon} alt="" />
           </button>
           </div>
         </div>
