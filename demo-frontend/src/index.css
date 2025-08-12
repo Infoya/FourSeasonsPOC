@@ -559,6 +559,8 @@ code {
 
 .chat-header {
   background-color: #000308;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
 }
 
 .header-text {
