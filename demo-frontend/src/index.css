@@ -214,6 +214,12 @@ code {
   height: 4rem;
 }
 
+/* Custom logo size */
+.hero-logo {
+  width: 8rem !important;
+  height: 8rem !important;
+}
+
 .text-6xl {
   font-size: 3.75rem;
   line-height: 1;

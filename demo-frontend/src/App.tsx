@@ -3,6 +3,7 @@ import './App.css';
 import ChatBot from './components/ChatBot';
 import aiIcon from './assets/images/ai-Icon.png'
 import fourseasonsLogo from './assets/images/fourseasons-app-logo.webp'
+import fslogowhite from './assets/images/fs-logo-white.png'
 
 function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -36,7 +37,7 @@ function App() {
                   className="w-8 h-8 object-contain rounded-lg"
                   style={{ borderRadius: '4px' }}
                 />
-                <span className="text-lg font-semibold ml-2">DOWNLOAD THE APP</span>
+                <span className="text-lg font-semibold ml-2">    DOWNLOAD THE APP</span>
               </div>
             </div>
             <nav className="hidden md:flex items-center space-x-8">
@@ -67,9 +68,9 @@ function App() {
       <section className="relative z-10 flex items-center justify-center min-h-screen px-4">
         <div className="text-center text-white max-w-4xl">
           <div className="mb-6">
-            <div className="w-16 h-16 mx-auto mb-4">
+            <div className="w-16 h-16 mx-auto mb-4 hero-logo">
               <img 
-                src={fourseasonsLogo} 
+                src={fslogowhite} 
                 alt="Four Seasons Logo" 
                 className="w-full h-full object-contain rounded-lg"
                 style={{ borderRadius: '8px' }}
