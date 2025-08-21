@@ -129,7 +129,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ isOpen, onClose }) => {
     <div className="chat-modal">
       <div className="chat-container">
         {/* Header */}
-          <div className="chat-header bg-black text-white px-4 py-3 flex items-center justify-between">
+          <div className="chat-header bg-black text-white px-4 py-2 flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <img src={fsIcon} alt="Logo" className="rounded-full bg-white" style={{height: '50px', width: '50px'}} />
               <div className='header-text'>

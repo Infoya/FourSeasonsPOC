@@ -564,11 +564,12 @@ code {
 }
 
 .chat-header {
-  height: 80px;
+  height: 60px !important;
   background-color: #000308;
   border-top-left-radius: 0.5rem;
   border-top-right-radius: 0.5rem;
 }
+
 
 .header-text {
   margin-left: 16px;
