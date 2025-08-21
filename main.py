@@ -597,31 +597,38 @@ You are handling a complex multi-part request. Follow these instructions EXACTLY
 🚨 CRITICAL RULES:
 1. ALWAYS call get_fourseasons_properties FIRST to get the owsCode
 2. NEVER call check_availability, get_property_dining, or get_property_experiences with an empty owsCode
-3. After check_availability, STOP and ask user to confirm booking
-4. Do NOT proceed to post_result_set until user confirms
-5. After post_result_set completes, AUTOMATICALLY continue with remaining steps
-6. Do NOT wait for additional user input after booking confirmation
-7. MAINTAIN CONVERSATION CONTEXT
-8. NEVER add random dining experiences unless explicitly requested with "add" or "include"
-9. "show me" = DISPLAY only, "add" or "include" = ADD to cart
+3. NEVER assume or default to any dates unless explicitly provided by the user
+4. If user asks for property details without dates, ONLY show property information, DO NOT check availability
+5. Only call check_availability when user provides specific start_date and end_date
+6. After check_availability, STOP and ask user to confirm booking
+7. Do NOT proceed to post_result_set until user confirms
+8. After post_result_set completes, AUTOMATICALLY continue with remaining steps
+9. Do NOT wait for additional user input after booking confirmation
+10. MAINTAIN CONVERSATION CONTEXT
+11. NEVER add random dining experiences unless explicitly requested with "add" or "include"
+12. "show me" = DISPLAY only, "add" or "include" = ADD to cart
 
 📋 EXECUTION SEQUENCE:
 STEP 1: get_fourseasons_properties() - Get property list and owsCode
-STEP 2: check_availability(owsCode, start_date, end_date) - Check availability
-STEP 3: STOP and ask user to confirm booking
-STEP 4: post_result_set() - Book the property (ONLY after user confirms)
-STEP 5: AUTOMATIC CONTINUATION - Execute Steps 5-7 automatically
-STEP 6: get_property_dining(owsCode) - Fetch dining options
-STEP 7: get_property_experiences(owsCode) - Fetch experience options
-STEP 8: post_addons() - Add requested experiences (if any)
-STEP 9: get_cart_result_set() - Show final cart
-STEP 10: Provide comprehensive summary
+STEP 2: If user provides dates → check_availability(owsCode, start_date, end_date) - Check availability
+STEP 3: If no dates provided → STOP and ask user for specific dates
+STEP 4: After availability check → STOP and ask user to confirm booking
+STEP 5: post_result_set() - Book the property (ONLY after user confirms)
+STEP 6: AUTOMATIC CONTINUATION - Execute Steps 6-8 automatically
+STEP 7: get_property_dining(owsCode) - Fetch dining options
+STEP 8: get_property_experiences(owsCode) - Fetch experience options
+STEP 9: post_addons() - Add requested experiences (if any)
+STEP 10: get_cart_result_set() - Show final cart
+STEP 11: Provide comprehensive summary
 
 🚨 AUTOMATIC CONTINUATION RULES:
 - After post_result_set completes, AUTOMATICALLY continue with remaining steps
 - Do NOT wait for additional user input after booking confirmation
 - Execute get_property_dining and get_property_experiences immediately
 - Show the results in a beautiful, organized list format
+- ALWAYS include the detailPageUrl from the API responses for dining and experiences
+- Format dining and experiences with: Name, Description, Price, and CLICKABLE LINK using detailPageUrl
+- Use markdown formatting: [Experience Name](detailPageUrl) for clickable links
 
 🚨 CONTEXT AWARENESS RULES:
 - ALWAYS check if user is referring to an EXISTING booking before creating a new one
@@ -651,7 +658,16 @@ Process this request step by step, following the exact sequence above.
 
 **IMPORTANT:** If the user asks to "show properties" or "show available properties", you MUST display the actual property list from get_fourseasons_properties() in a beautiful, organized format. Do not ask for more information - show the properties first!
 
+**CRITICAL DATE RULE:** NEVER assume, default, or generate any dates unless explicitly provided by the user. If the user asks for property details without dates, ONLY show property information and ask them to provide specific dates.
+
 After booking confirmation, automatically fetch and display dining and experience options in a beautiful, organized format. Do not ask the user to wait - execute the calls immediately and present the results.
+
+🚨 DINING & EXPERIENCES DISPLAY RULES:
+- ALWAYS include the detailPageUrl from get_property_dining and get_property_experiences API responses
+- Format each dining option and experience with: Name, Description, Price, and CLICKABLE LINK using detailPageUrl
+- Use markdown formatting: [Experience Name](detailPageUrl) for clickable links
+- Include pricing information when available from the API response
+- Present dining and experiences in organized sections with clear headings
 """
     
     return enhanced_prompt
@@ -691,7 +707,11 @@ def run_assistant(user_input: str, thread_id: str = None):
 - "show me" = DISPLAY only, "add" or "include" = ADD to cart
 - MAINTAIN CONVERSATION CONTEXT: Use existing result_set_id when user refers to current booking
 - NEVER create duplicate bookings for the same conversation
-- Always use current year(2025) or above if the year is not specified in dates
+- NEVER assume or default to any dates unless explicitly provided by the user
+- If user asks for property details without dates, ONLY show property information, DO NOT check availability
+- Only call check_availability when user provides specific start_date and end_date
+- CRITICAL: When displaying dining and experiences, ALWAYS include the detailPageUrl as clickable links
+- Format as: [Experience Name](detailPageUrl) with prices and descriptions
 """
     else:
         enhanced_input = user_input
