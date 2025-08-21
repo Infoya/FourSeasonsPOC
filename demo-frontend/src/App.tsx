@@ -37,7 +37,8 @@ function App() {
                   className="w-8 h-8 object-contain rounded-lg"
                   style={{ borderRadius: '4px' }}
                 />
-                <span className="text-lg font-semibold ml-2">    DOWNLOAD THE APP</span>
+                <div className="w-4"></div>
+                <span className="text-lg font-semibold">DOWNLOAD THE APP</span>
               </div>
             </div>
             <nav className="hidden md:flex items-center space-x-8">
