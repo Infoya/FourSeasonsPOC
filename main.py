@@ -629,6 +629,13 @@ STEP 10: Provide comprehensive summary
 - NEVER create duplicate bookings for the same request
 - Maintain conversation context and use the most recent result_set_id from the conversation
 
+🚨 PROPERTY DISPLAY RULES:
+- When user asks to "show properties in [region]" or "show available properties", ALWAYS display the actual property list
+- Use the fetch_all_properties() data to show a beautiful, organized list of properties
+- Include property names, regions, and owsCodes in the display
+- Do NOT just ask for more information - SHOW the properties first
+- Format the response with clear headings, bullet points, and organized information
+
 📝 USER REQUEST: {user_input}
 
 🔍 EXTRACTED INFORMATION:
@@ -640,7 +647,11 @@ STEP 10: Provide comprehensive summary
 - Requested Experiences: {extracted_info.get('requested_experiences', [])}
 
 🎯 YOUR TASK:
-Process this request step by step, following the exact sequence above. After booking confirmation, automatically fetch and display dining and experience options in a beautiful, organized format. Do not ask the user to wait - execute the calls immediately and present the results.
+Process this request step by step, following the exact sequence above. 
+
+**IMPORTANT:** If the user asks to "show properties" or "show available properties", you MUST display the actual property list from get_fourseasons_properties() in a beautiful, organized format. Do not ask for more information - show the properties first!
+
+After booking confirmation, automatically fetch and display dining and experience options in a beautiful, organized format. Do not ask the user to wait - execute the calls immediately and present the results.
 """
     
     return enhanced_prompt
